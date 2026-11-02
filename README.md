@@ -1,2 +1,0 @@
-# Dolanan-kampung
-game kampung

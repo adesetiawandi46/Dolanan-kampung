@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dolanan Kampung – Permainan Tradisional</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg1:#1b0b3a;--bg2:#3a0ca3;--pink:#ff3cac;--cyan:#2de2e6;--yel:#ffe45e;--card:rgba(255,255,255,.09);--tx:#fff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;font-family:Fredoka,system-ui,sans-serif;color:var(--tx)}
+body{background:radial-gradient(circle at 20% 0,#7b2ff7 0,transparent 45%),radial-gradient(circle at 90% 100%,#ff3cac55 0,transparent 40%),linear-gradient(160deg,var(--bg1),var(--bg2));min-height:100vh;padding:env(safe-area-inset-top) 14px 24px}
+.wrap{max-width:480px;margin:0 auto;padding-top:18px;text-align:center}
+h1{font-size:2.3rem;margin:.2em 0;line-height:1;background:linear-gradient(90deg,var(--yel),var(--pink),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{opacity:.8;margin-bottom:16px}
+input{width:100%;padding:12px 16px;border-radius:14px;border:2px solid #fff3;background:#0004;color:#fff;font:inherit;text-align:center;margin-bottom:14px}
+.card{background:var(--card);border:2px solid #fff2;border-radius:22px;padding:16px;margin:12px 0;backdrop-filter:blur(8px);text-align:left}
+.card h2{margin:0 0 4px;font-size:1.4rem}
+.card p{margin:0 0 10px;opacity:.85;font-size:.95rem}
+.btn{display:inline-block;border:0;border-radius:16px;padding:12px 22px;font:700 1.05rem Fredoka,sans-serif;color:#1b0b3a;background:linear-gradient(90deg,var(--yel),#ffb347);box-shadow:0 5px 0 #b57a00;cursor:pointer;transition:transform .08s}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 #b57a00}
+.btn.pk{background:linear-gradient(90deg,var(--pink),#ff7ac6);box-shadow:0 5px 0 #a01670;color:#fff}
+.btn.cy{background:linear-gradient(90deg,var(--cyan),#7df9ff);box-shadow:0 5px 0 #0f8f93}
+.btn.big{width:100%;font-size:1.3rem;padding:16px}
+.hud{display:flex;justify-content:space-between;gap:6px;margin-bottom:10px}
+.hud span{flex:1;background:var(--card);border-radius:12px;padding:6px;font-weight:600;font-size:.9rem}
+.board{display:flex;flex-direction:column-reverse;gap:6px;margin:10px auto;width:150px}
+.box{height:54px;border-radius:12px;border:3px solid #fff5;background:#ffffff14;display:flex;align-items:center;justify-content:center;font-size:1.6rem;position:relative}
+.box b{position:absolute;left:8px;top:2px;font-size:.8rem;opacity:.6}
+.box.cur{background:#2de2e633;border-color:var(--cyan);box-shadow:0 0 18px var(--cyan)}
+.box.stone{background:#ff3cac33;border-color:var(--pink)}
+.bar{position:relative;height:30px;border-radius:15px;background:#0005;overflow:hidden;margin:12px 0;border:2px solid #fff3}
+.zone{position:absolute;top:0;bottom:0;background:linear-gradient(#5cff9d,#1fbf6b);opacity:.9}
+.mk{position:absolute;top:0;bottom:0;width:8px;background:#fff;box-shadow:0 0 10px #fff;border-radius:4px}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:10px 0}
+.cell{aspect-ratio:1;border-radius:10px;background:#ffffff12;display:flex;align-items:center;justify-content:center;font-size:1.5rem}
+.cell.f{background:#ffe45e33}
+.cell.p{background:#2de2e633}
+.pad{display:grid;grid-template-columns:repeat(3,64px);gap:6px;justify-content:center;margin-top:8px}
+.pad .btn{padding:10px;font-size:1.3rem}
+.shake{animation:sh .3s}
+@keyframes sh{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.pop{animation:pp .35s}
+@keyframes pp{50%{transform:scale(1.15)}}
+ol{padding-left:22px;margin:6px 0;text-align:left}
+.msg{min-height:24px;font-weight:600;color:var(--yel)}
+.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.ck{display:grid;grid-template-columns:50px repeat(7,1fr) 50px;grid-template-rows:1fr 1fr;gap:5px;margin:10px 0;background:#0004;padding:8px;border-radius:20px;border:2px solid #fff3}
+.hole{aspect-ratio:1;border-radius:50%;border:2px solid #fff4;background:radial-gradient(circle at 35% 30%,#ffffff30,#0006);color:#fff;font:700 1rem Fredoka,sans-serif;padding:0}
+.hole.me:not(:disabled){border-color:var(--cyan);box-shadow:0 0 12px var(--cyan);cursor:pointer}
+.store{grid-row:span 2;border-radius:25px;background:#ff3cac33;border:2px solid var(--pink);display:flex;flex-direction:column;align-items:center;justify-content:center;font:700 1.5rem Fredoka,sans-serif}
+.store.me{background:#2de2e633;border-color:var(--cyan)}.store small{font-size:.55rem;opacity:.7}
+
+/* ===== TEMA KAMPUNG: sawah, sore hari, tanah, kayu ===== */
+:root{--bg1:#ffb347;--bg2:#7bc96f;--pink:#d94f30;--cyan:#2f9e6b;--yel:#ffd23f;--card:rgba(255,248,225,.94);--tx:#3b2412}
+body{background:radial-gradient(circle at 82% 7%,#fff7c2 0,#ffe08a 6%,transparent 17%),linear-gradient(#ffcf8b 0,#ff9f6b 30%,#9ad27a 64%,#4f9a4a 100%) fixed;color:var(--tx)}
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:10px;z-index:5;background:repeating-linear-gradient(90deg,#b5261e 0 14px,#ffd23f 14px 28px,#2f7d3a 28px 42px)}
+body::after{content:"🌾🌴🛖🌾🐄🌾🌴🌾🐓🌾";position:fixed;bottom:0;left:0;right:0;z-index:-1;font-size:2rem;text-align:center;letter-spacing:8px;opacity:.6;white-space:nowrap;overflow:hidden;pointer-events:none}
+h1{background:none;-webkit-background-clip:initial;background-clip:initial;color:#b5261e;text-shadow:2px 2px 0 #ffd23f,4px 4px 0 #6b3a1e;letter-spacing:1px}
+.sub{opacity:1;color:#4a2c14;font-weight:600}
+input{background:#fff8e1;color:#3b2412;border:3px solid #8a5a2b}
+.card{border:3px solid #8a5a2b;box-shadow:0 5px 0 #8a5a2b;backdrop-filter:none}.card p{opacity:1}
+.btn{background:linear-gradient(#ffd23f,#f5a623);box-shadow:0 5px 0 #a36a12;color:#3b2412}
+.btn.pk{background:linear-gradient(#ef6a4a,#c93a22);box-shadow:0 5px 0 #8c2412;color:#fff}
+.btn.cy{background:linear-gradient(#5fc98a,#2f9e6b);box-shadow:0 5px 0 #1c6b45;color:#fff}
+.btn:active{box-shadow:0 1px 0 #0003}
+.hud span{background:#fff8e1;border:2px solid #8a5a2b}
+.msg{color:#8c2412}
+.board{background:#b97a45;padding:8px;border-radius:14px;border:3px solid #6b3a1e;box-shadow:inset 0 0 20px #0004}
+.box{border-color:#fff8e1;background:#c98b4e;color:#fff8e1}.box.cur{background:#ffd23f88;border-color:#ffd23f;box-shadow:0 0 14px #ffd23f}.box.stone{background:#d94f3066;border-color:#ffd23f}
+.bar{background:#6b3a1e;border-color:#3b2412}.mk{background:#fff8e1;box-shadow:0 0 10px #fff}
+.grid{background:#7a4a24;padding:6px;border-radius:14px;border:3px solid #4a2c14;color:#fff}.cell{background:#9b6335}.cell.f{background:#ffd23f99}.cell.p{background:#5fc98a99}
+.ck{background:#8a5a2b;border-color:#4a2c14}.hole{background:radial-gradient(circle at 35% 30%,#5a361a,#2f1b0c);border-color:#d9a066;color:#fff8e1}
+.hole.me:not(:disabled){border-color:#ffd23f;box-shadow:0 0 12px #ffd23f}.store{background:#5a361a;border-color:#d94f30;color:#fff8e1}.store.me{background:#5a361a;border-color:#5fc98a}
+#mute,#music,#nx{position:fixed;top:16px;right:12px;z-index:6;width:42px;height:42px;border-radius:50%;border:3px solid #8a5a2b;background:#fff8e1;font-size:1.2rem;cursor:pointer;box-shadow:0 3px 0 #8a5a2b;padding:0}
+#music{right:62px}#nx{right:112px}.wrap{padding-top:64px}
+#toast{position:fixed;top:66px;left:50%;transform:translateX(-50%);z-index:7;background:#fff8e1;border:3px solid #8a5a2b;border-radius:14px;padding:6px 14px;font-weight:600;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;font-size:.9rem}
+body{background:var(--scene) center bottom/cover no-repeat fixed,#ff9f6b}
+body::after{content:none}
+.kid{aspect-ratio:40/64;object-fit:contain;pointer-events:none;-webkit-user-drag:none}
+.box .kid{height:50px}.cell .kid{width:64%;height:auto}.hero .kid{height:84px}
+.kid{transform-origin:50% 100%}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-6px) rotate(2deg)}}
+@keyframes hop{0%{transform:none}30%{transform:translateY(-14px) scale(.92,1.1)}60%{transform:translateY(0) scale(1.1,.88)}100%{transform:none}}
+@keyframes dance{0%,100%{transform:translateY(0) rotate(-7deg)}50%{transform:translateY(-16px) rotate(7deg)}}
+@keyframes run{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg) translateY(-2px)}}
+.hero .kid{animation:bob 1.2s ease-in-out infinite}.hero .kid:nth-child(2){animation-delay:.3s}.hero .kid:nth-child(3){animation-delay:.6s}.hero .kid:nth-child(4){animation-delay:.9s}
+.hero.dance .kid{animation:dance .5s ease-in-out infinite}
+.box.cur .kid,.cell.p .kid{animation:hop .35s ease-out}
+.cell:not(.p) .kid{animation:run .35s ease-in-out infinite}
+.av{background:none;border:3px solid transparent;border-radius:14px;padding:2px 3px;cursor:pointer}.av.on{background:#fff8e1cc;border-color:#d94f30}.pick .kid{height:58px}
+.cf{position:fixed;top:-20px;width:10px;height:14px;z-index:9;pointer-events:none;animation:cf 2.6s ease-in forwards}
+@keyframes cf{to{transform:translate(var(--dx),105vh) rotate(720deg)}}
+.sky{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.cloud{position:absolute;font-size:64px;opacity:.9;animation:drift linear infinite}
+@keyframes drift{from{transform:translateX(-25vw)}to{transform:translateX(125vw)}}
+.bird{position:absolute;width:26px;animation:fly linear infinite}.bird svg{display:block;animation:flap .4s ease-in-out infinite;transform-origin:50% 100%}
+@keyframes fly{from{transform:translateX(-10vw)}to{transform:translateX(115vw) translateY(-40px)}}
+@keyframes flap{50%{transform:scaleY(.4)}}
+.kite{position:absolute;right:8%;top:13%;font-size:38px;animation:sway 3s ease-in-out infinite;transform-origin:50% 100%}
+@keyframes sway{50%{transform:rotate(12deg) translateY(10px)}}
+@media (prefers-reduced-motion:reduce){.cloud,.bird,.bird svg,.kite,.cf,.kid{animation:none!important}}
+</style>
+</head>
+<body>
+<button id="nx" aria-label="Lagu berikutnya">⏭</button><button id="music" aria-label="Musik">🎵</button><button id="mute" aria-label="Suara">🔊</button><div id="toast"></div>
+<div class="wrap" id="app"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+/* ====== ISI DENGAN KUNCI SUPABASE KAMU (kosongkan = leaderboard lokal) ====== */
+const SB_URL = "";
+const SB_KEY = "";
+/* =========================================================================== */
+
+const $ = s => document.querySelector(s), app = $("#app");
+let sb = null;
+try { if (SB_URL && SB_KEY && window.supabase) sb = supabase.createClient(SB_URL, SB_KEY); } catch (e) {}
+const ls = {
+  get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d } catch (e) { return d } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)) } catch (e) {} }
+};
+/* ---------- SUARA (disintesis WebAudio, tanpa file) ---------- */
+let AC = null, muted = ls.get("mute", false);
+const ac = () => { if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)() } catch (e) {} } if (AC && AC.state === "suspended") AC.resume(); return AC };
+function tone(f, d = .2, type = "sine", v = .2, t0 = 0, slide = 0) {
+  if (muted) return; const a = ac(); if (!a) return; const t = a.currentTime + t0, o = a.createOscillator(), g = a.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, t); if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, f + slide), t + d);
+  g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.001, t + d); o.connect(g); g.connect(a.destination); o.start(t); o.stop(t + d + .03);
+}
+const PEN = [523, 587, 698, 784, 880, 1047];
+const bell = (f, d = .5, v = .2, t0 = 0) => { tone(f, d, "sine", v, t0); tone(f * 2.76, d * .5, "sine", v * .35, t0) };
+const sfx = {
+  click: () => tone(650, .05, "square", .06),
+  hop: n => bell(PEN[Math.abs(n) % 5], .35, .2),
+  up: () => [0, 1, 3, 5].forEach((k, i) => bell(PEN[k], .5, .2, i * .1)),
+  win: () => [0, 1, 2, 3, 4, 5].forEach((k, i) => bell(PEN[k], .7, .22, i * .12)),
+  lose: () => { sfx.knock(); tone(220, .6, "triangle", .2, .3, -120) },
+  knock: () => { tone(190, .2, "triangle", .4, 0, -70); tone(150, .22, "triangle", .35, .13, -60) },
+  step: () => tone(300, .05, "triangle", .1, 0, -100),
+  seed: () => tone(700 + Math.random() * 250, .06, "triangle", .15, 0, -300),
+  capture: () => { bell(784, .4, .22); bell(1047, .5, .2, .09) },
+  flick: () => tone(260, .14, "sawtooth", .08, 0, 600),
+  clack: k => { tone(1500 + Math.random() * 500, .05, "sine", .06 + .12 * k); tone(2400, .03, "triangle", .05 * k) },
+  jump: () => tone(380, .16, "sine", .14, 0, 420)
+};
+const mb = $("#mute"); mb.textContent = muted ? "🔇" : "🔊";
+mb.onclick = () => { muted = !muted; ls.set("mute", muted); mb.textContent = muted ? "🔇" : "🔊"; if (!muted) { ac(); sfx.click(); musicStart() } else musicStop(); };
+/* ---------- LAGU DOLANAN (instrumental gamelan, disintesis) ---------- */
+/* Tiap angka = indeks nada pentatonik (0=do rendah ... 5=do tinggi), "." = jeda. Silakan edit nadanya! */
+const PN = [262, 294, 330, 392, 440, 523, 587, 659, 784, 880];
+const SONGS = [
+  { n: "Cublak-Cublak Suweng (Jawa)", bpm: 160, m: "2 2 2 2 3 3 2 . 3 3 3 3 4 4 3 . 4 4 3 3 2 2 1 . 2 3 2 1 0 0 0 ." },
+  { n: "Gundul-Gundul Pacul (Jawa)", bpm: 140, m: "4 4 4 3 2 . 3 . 4 4 4 3 2 . 3 . 2 2 3 2 1 . 0 . 1 1 2 1 0 . 0 ." },
+  { n: "Lir-Ilir (Jawa)", bpm: 120, m: "2 4 5 4 2 . 3 . 2 4 5 4 2 . 1 . 3 5 6 5 3 . 4 . 2 3 4 3 1 . 0 ." },
+  { n: "Burung Kakak Tua (Maluku)", bpm: 150, m: "5 5 5 6 5 . 3 . 4 4 4 3 2 . . . 5 5 5 6 5 . 3 . 4 3 2 1 0 . . ." },
+  { n: "Ampar-Ampar Pisang (Kalsel)", bpm: 150, m: "3 3 4 4 3 . 2 . 3 3 4 4 3 . 2 . 4 4 5 4 3 . 2 . 1 2 3 2 0 . . ." },
+  { n: "Soleram (Riau)", bpm: 130, m: "2 3 4 4 3 . 2 . 3 4 5 5 4 . 3 . 4 4 3 2 1 . 0 . 2 2 3 2 0 . . ." },
+  { n: "Pok Ame-Ame (Betawi)", bpm: 170, m: "4 4 5 4 3 . 3 . 4 4 5 4 3 . 3 . 5 5 4 3 2 . 2 . 3 3 2 1 0 . . ." },
+  { n: "Manuk Dadali (Sunda)", bpm: 150, m: "0 2 3 4 5 . 4 . 3 4 5 6 5 . 4 . 3 2 3 4 3 . 2 . 3 2 1 2 0 . . ." },
+  { n: "Es Lilin (Sunda)", bpm: 100, m: "3 . 4 . 5 . 4 3 2 . 3 . 4 . 3 2 1 . 2 . 3 . 2 1 0 . . . 0 . . ." }
+];
+let song = Math.min(ls.get("song", 0), SONGS.length - 1), music = ls.get("music", true), mi = 0, loops = 0, nextT = 0, mt = null, tt;
+function toast(t) { const e = $("#toast"); e.textContent = t; e.style.opacity = 1; clearTimeout(tt); tt = setTimeout(() => e.style.opacity = 0, 2200) }
+/* File rekaman (opsional): taruh mp3 di assets/music/<judul-lagu>.mp3, otomatis dipakai menggantikan versi sintesis */
+const au = new Audio(); au.volume = .55; let pf = false;
+SONGS.forEach(S => {
+  S.f = "assets/music/" + S.n.split(" (")[0].toLowerCase().replace(/[^a-z]+/g, "-") + ".mp3";
+  fetch(S.f, { method: "HEAD" }).then(r => { S.ok = r.ok && /audio|mpeg|ogg/.test(r.headers.get("content-type") || "") }).catch(() => {});
+});
+function nextSong() { song = (song + 1) % SONGS.length; mi = 0; loops = 0; ls.set("song", song); toast("🎶 " + SONGS[song].n); musicStop(); musicStart() }
+au.onended = nextSong;
+/* Aransemen gamelan: bonang + saron (melodi & bass), kendang (dung-dang-tak), kempul, dan gong */
+function sched() {
+  const a = AC; if (!a) return; const S = SONGS[song], d = 60 / S.bpm, nt = S.m.split(" ");
+  while (nextT < a.currentTime + .3) {
+    const k = nt[mi % nt.length], rel = Math.max(0, nextT - a.currentTime), m8 = mi % 8, m16 = mi % 16;
+    if (k !== ".") { bell(PN[+k], .55, .09, rel); tone(PN[+k] * 2, .18, "triangle", .02, rel); if (mi % 2 === 0) tone(PN[+k] / 2, d * 1.8, "triangle", .1, rel) }
+    if (m8 === 0 || m8 === 4) tone(150, .2, "sine", .24, rel, -95);
+    else if (m8 === 2 || m8 === 6) tone(300, .1, "triangle", .13, rel, -140);
+    else tone(2200, .035, "square", .025, rel);
+    if (m16 === 8) tone(220, 1, "sine", .1, rel);
+    if (m16 === 0) { tone(110, 1.8, "sine", .16, rel); tone(165, 1.3, "sine", .06, rel) }
+    mi++; nextT += d;
+    if (mi % nt.length === 0 && ++loops >= 2) { nextSong(); break }
+  }
+}
+function musicStart() {
+  if (!music || muted) return; const S = SONGS[song];
+  if (S.ok) { if (pf) return; pf = true; au.src = S.f; au.play().catch(() => { pf = false }); return }
+  if (mt) return; const a = ac(); if (!a) return; nextT = a.currentTime + .1; mt = setInterval(sched, 100);
+}
+function musicStop() { clearInterval(mt); mt = null; au.pause(); pf = false }
+const mub = $("#music"); mub.textContent = music ? "🎵" : "🔕"; mub.style.opacity = music ? 1 : .6;
+mub.onclick = () => { music = !music; ls.set("music", music); mub.textContent = music ? "🎵" : "🔕"; mub.style.opacity = music ? 1 : .6; if (music) { musicStart(); toast("🎶 " + SONGS[song].n) } else musicStop() };
+$("#nx").onclick = () => { song = (song + 1) % SONGS.length; mi = 0; loops = 0; ls.set("song", song); toast("🎶 " + SONGS[song].n); if (!music) mub.onclick(); else { musicStop(); musicStart() } };
+document.addEventListener("visibilitychange", () => document.hidden ? musicStop() : musicStart());
+addEventListener("pointerdown", e => { ac(); musicStart(); if (e.target.closest && e.target.closest(".btn:not(#jp):not(#hop)")) sfx.click() }, true);
+
+let stop = () => {};
+let nick = ls.get("nick", "");
+
+async function saveScore(game, score) {
+  const name = nick || "Anonim";
+  if (sb) { try { const { error } = await sb.from("scores").insert({ name, game, score }); if (!error) return } catch (e) {} }
+  const all = ls.get("scores", []); all.push({ name, game, score }); ls.set("scores", all);
+}
+async function getBoard(game) {
+  if (sb) { try { const { data, error } = await sb.from("scores").select("name,score").eq("game", game).order("score", { ascending: false }).limit(5); if (!error && data) return data } catch (e) {} }
+  return ls.get("scores", []).filter(s => s.game === game).sort((a, b) => b.score - a.score).slice(0, 5);
+}
+
+function menu() {
+  stop();
+  app.innerHTML = `
+  <div class="hero pick" style="display:flex;justify-content:center;align-items:flex-end;gap:4px">${Object.keys(KS).map(n => `<button class="av ${n === avatar ? "on" : ""}" data-n="${n}" onclick="pickAv('${n}')">${kidTag(n)}</button>`).join("")}</div><div style="font-size:.8rem;font-weight:600;color:#4a2c14">Ketuk untuk pilih karakter kamu</div><h1>DOLANAN KAMPUNG</h1>
+  <div class="sub">Hayu ulin, ayo dolanan! Kayak sore-sore di kampung, tapi versi game 🌾</div>
+  <input id="nick" maxlength="14" placeholder="Nama panggilanmu, Kang/Teh…" value="${nick}">
+  <div class="card"><h2>🦶 Engklek (Sondah)</h2><p>Lempar gaco, loncat satu kaki. Jangan sampai nginjak garis ya!</p><button class="btn pk" onclick="go('engklek')">MAIN</button></div>
+  <div class="card"><h2>🏰 Benteng</h2><p>Rebut benteng lawan di ujung lapangan, awas ketangkep penjaga!</p><button class="btn cy" onclick="go('benteng')">MAIN</button></div>
+  <div class="card"><h2>🥜 Congklak</h2><p>Sebar biji sawo, tembak lubang lawan. Si Mbah AI-nya licik lho!</p><button class="btn" onclick="go('congklak')">MAIN</button></div>
+  <div class="card"><h2>🔮 Gundu (Kelereng)</h2><p>Sentil kelereng keluar lingkaran. Menang? Dapet sekantong!</p><button class="btn pk" onclick="go('gundu')">MAIN</button></div>
+  <div class="card"><h2>🪢 Lompat Tali</h2><p>Loncat pas karet lewat. Makin lama makin ngebut!</p><button class="btn cy" onclick="go('tali')">MAIN</button></div>
+  <div class="card"><h2>🐱 Ucing Sumput</h2><p>Ucing ngitung, kamu ngumpet! Sampai ke tiang 🏠 tanpa ketahuan ya.</p><button class="btn pk" onclick="go('sumput')">MAIN</button></div>
+  <div class="card"><h2>🎋 Egrang</h2><p>Naik batang bambu, jaga keseimbangan. Awas oleng, jangan sampai jatuh!</p><button class="btn" onclick="go('egrang')">MAIN</button></div>
+  <div class="card"><h2>🏆 Juara Kampung</h2><div class="row" id="chips" style="margin-bottom:8px"></div><div id="lb">Memuat…</div></div>
+  <div class="sub" style="font-size:.8rem">${sb ? "🟢 Online, skor sekampung" : "🟡 Mode lokal"}</div>`;
+  showLb("engklek");
+}
+const GAMES = { engklek: "🦶", benteng: "🏰", congklak: "🥜", gundu: "🔮", tali: "🪢", sumput: "🐱", egrang: "🎋" };
+async function showLb(g) {
+  const ch = $("#chips"); if (!ch) return;
+  ch.innerHTML = Object.entries(GAMES).map(([k, v]) => `<button class="btn ${k === g ? "pk" : ""}" style="padding:6px 12px;font-size:.9rem" onclick="showLb('${k}')">${v}</button>`).join("");
+  const l = await getBoard(g);
+  $("#lb").innerHTML = `<b>${g.toUpperCase()}</b><ol>${l.map(x => `<li>${x.name} – ${x.score}</li>`).join("") || "<li>Belum ada</li>"}</ol>`;
+}
+function go(g) {
+  nick = ($("#nick").value || "").trim() || "Anonim"; ls.set("nick", nick);
+  window[g]();
+}
+async function end(game, score, title) {
+  stop(); /JUARA|MENANG/.test(title) ? sfx.win() : sfx.lose();
+  await saveScore(game, score);
+  const b = await getBoard(game);
+  app.innerHTML = `<div class="hero ${/JUARA|MENANG/.test(title) ? "dance" : ""}" style="display:flex;justify-content:center;align-items:flex-end;gap:8px">${kidTag(avatar)}${kidTag(other())}${kidTag(other2())}</div><h1>${title}</h1><div class="card" style="text-align:center"><div style="font-size:3rem">⭐ ${score}</div><p>Skor atas nama <b>${nick}</b> udah dicatat ✍️</p></div>
+  <div class="card"><h2>🏆 Juara Kampung</h2><ol>${b.map(x => `<li>${x.name} – ${x.score}</li>`).join("")}</ol></div>
+  <div class="row"><button class="btn pk" onclick="${game}()">ULIN LAGI</button><button class="btn" onclick="menu()">PULANG</button></div>`;
+}
+
+/* ---------------- ENGKLEK ---------------- */
+function engklek() {
+  let lvl = 1, idx = 0, lives = 3, score = 0, combo = 0, m = 0, dir = 1, zs = 0, zw = 0, last = 0, raf, msg = "";
+  const steps = () => [1, 2, 3, 4, 5, 6].filter(n => n !== lvl);
+  const newZone = () => { zw = Math.max(13, 34 - lvl * 3); zs = 8 + Math.random() * (84 - zw) };
+  newZone();
+  app.innerHTML = `<h1>ENGKLEK</h1>
+  <div class="hud"><span id="h1"></span><span id="h2"></span><span id="h3"></span></div>
+  <div class="board" id="bd"></div>
+  <div class="bar"><div class="zone" id="zn"></div><div class="mk" id="mk"></div></div>
+  <div class="msg" id="ms">Tap pas penanda di zona hijau, jangan injak garis!</div>
+  <button class="btn pk big" id="hop">LONCAT! 🦶</button>
+  <p><button class="btn" onclick="menu()" style="font-size:.85rem;padding:8px 14px">Pulang</button></p>`;
+  function draw() {
+    const s = steps(), cur = idx === 0 ? 0 : s[idx - 1];
+    $("#h1").textContent = "Level " + lvl; $("#h2").textContent = "❤️".repeat(lives) || "💀"; $("#h3").textContent = "⭐ " + score + (combo > 1 ? " x" + combo : "");
+    $("#bd").innerHTML = [1, 2, 3, 4, 5, 6].map(n => `<div class="box ${n === cur ? "cur" : ""} ${n === lvl ? "stone" : ""}"><b>${n}</b>${n === cur ? kidTag(avatar) : n === lvl ? "🪨" : ""}</div>`).join("");
+    $("#zn").style.cssText = `left:${zs}%;width:${zw}%`;
+  }
+  function tap() {
+    const hit = m >= zs && m <= zs + zw, bd = $("#bd");
+    if (hit) {
+      combo++; sfx.hop(combo - 1); score += 10 * Math.min(combo, 5); idx++; msg = combo > 2 ? "🔥 Combo x" + combo + "!" : "Mantul!";
+      bd.classList.remove("pop"); void bd.offsetWidth; bd.classList.add("pop");
+      if (idx >= steps().length) { score += 100 * lvl; lvl++; idx = 0; msg = "Naik kelas! 🎉"; sfx.up(); if (lvl > 6) return end("engklek", score + 500, "JUARA KAMPUNG! 👑") }
+      newZone();
+    } else {
+      lives--; combo = 0; idx = 0; sfx.knock(); msg = "Euleuh, kepleset! Ulang deui 😵";
+      bd.classList.remove("shake"); void bd.offsetWidth; bd.classList.add("shake");
+      if (lives <= 0) return end("engklek", score, "YAAH, KENA! 😵");
+    }
+    $("#ms").textContent = msg; draw();
+  }
+  function loop(t) {
+    const dt = Math.min(.05, (t - last) / 1000 || 0); last = t;
+    m += dir * (55 + lvl * 20) * dt;
+    if (m >= 100) { m = 100; dir = -1 } if (m <= 0) { m = 0; dir = 1 }
+    $("#mk").style.left = "calc(" + m + "% - " + (m / 100 * 8) + "px)";
+    raf = requestAnimationFrame(loop);
+  }
+  const key = e => { if (e.code === "Space") { e.preventDefault(); tap() } };
+  $("#hop").onpointerdown = tap; addEventListener("keydown", key);
+  stop = () => { cancelAnimationFrame(raf); removeEventListener("keydown", key) };
+  draw(); raf = requestAnimationFrame(loop);
+}
+
+/* ---------------- BENTENG ---------------- */
+function benteng() {
+  const N = 7; let round = 1, lives = 3, score = 0, P, E = [], steps = 0;
+  const rnd = n => Math.floor(Math.random() * n);
+  function setup() {
+    P = { x: 3, y: N - 1 }; E = [];
+    for (let i = 0; i < 2 + round; i++) E.push({ x: rnd(N), y: 1 + rnd(3) });
+    E = E.filter(e => !(e.x === 3 && e.y === 0));
+  }
+  app.innerHTML = `<h1>BENTENG</h1>
+  <div class="hud"><span id="h1"></span><span id="h2"></span><span id="h3"></span></div>
+  <div class="msg" id="ms">Rebut 🚩 di atas! Panah / WASD / swipe, awas ketangkep!</div>
+  <div class="grid" id="gr"></div>
+  <div class="pad"><span></span><button class="btn cy" data-d="0,-1">⬆️</button><span></span><button class="btn cy" data-d="-1,0">⬅️</button><button class="btn cy" data-d="0,1">⬇️</button><button class="btn cy" data-d="1,0">➡️</button></div>
+  <p><button class="btn" onclick="menu()" style="font-size:.85rem;padding:8px 14px">Pulang</button></p>`;
+  function draw() {
+    $("#h1").textContent = "Ronde " + round; $("#h2").textContent = "❤️".repeat(lives) || "💀"; $("#h3").textContent = "⭐ " + score;
+    let h = "";
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+      const en = E.some(e => e.x === x && e.y === y);
+      const c = P.x === x && P.y === y ? kidTag(avatar) : en ? kidTag(other()) : x === 3 && y === 0 ? "🚩" : "";
+      h += `<div class="cell ${x === 3 && y === 0 ? "f" : ""} ${P.x === x && P.y === y ? "p" : ""}">${c}</div>`;
+    }
+    $("#gr").innerHTML = h;
+  }
+  function hitCheck() {
+    if (E.some(e => e.x === P.x && e.y === P.y)) {
+      lives--; sfx.knock(); $("#gr").classList.add("shake"); setTimeout(() => $("#gr").classList.remove("shake"), 300);
+      $("#ms").textContent = "Ketangkep! Hayu ulang 😱";
+      if (lives <= 0) { end("benteng", score, "YAAH, KENA! 😵"); return true }
+      P = { x: 3, y: N - 1 };
+    }
+    return false;
+  }
+  function move(dx, dy) {
+    const nx = P.x + dx, ny = P.y + dy;
+    if (nx < 0 || ny < 0 || nx >= N || ny >= N) return;
+    P = { x: nx, y: ny }; sfx.step();
+    if (hitCheck()) return;
+    if (P.x === 3 && P.y === 0) { score += 100 + round * 25; round++; sfx.up(); $("#ms").textContent = "Benteng jebol! 🎉"; setup(); draw(); return }
+    E.forEach(e => {
+      if (Math.random() < .35 + Math.min(round, 5) * .06) {
+        if (Math.random() < .7) { Math.abs(P.x - e.x) > Math.abs(P.y - e.y) ? e.x += Math.sign(P.x - e.x) : e.y += Math.sign(P.y - e.y) }
+        else { e.x = Math.max(0, Math.min(N - 1, e.x + rnd(3) - 1)); e.y = Math.max(0, Math.min(N - 1, e.y + rnd(3) - 1)) }
+      }
+    });
+    score += 1; if (!hitCheck()) draw();
+  }
+  const keys = { ArrowUp: [0, -1], w: [0, -1], ArrowDown: [0, 1], s: [0, 1], ArrowLeft: [-1, 0], a: [-1, 0], ArrowRight: [1, 0], d: [1, 0] };
+  const key = e => { const k = keys[e.key]; if (k) { e.preventDefault(); move(...k) } };
+  addEventListener("keydown", key);
+  document.querySelectorAll(".pad [data-d]").forEach(b => b.onpointerdown = () => move(...b.dataset.d.split(",").map(Number)));
+  let sx, sy;
+  const ts = e => { sx = e.touches[0].clientX; sy = e.touches[0].clientY };
+  const te = e => { const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy; if (Math.max(Math.abs(dx), Math.abs(dy)) < 30) return; Math.abs(dx) > Math.abs(dy) ? move(Math.sign(dx), 0) : move(0, Math.sign(dy)) };
+  $("#gr").addEventListener("touchstart", ts, { passive: true }); $("#gr").addEventListener("touchend", te);
+  stop = () => removeEventListener("keydown", key);
+  setup(); draw();
+}
+/* ---------------- CONGKLAK ---------------- */
+function congklak() {
+  let b = Array(16).fill(7); b[7] = 0; b[15] = 0; let busy = false, over = false;
+  const sl = ms => new Promise(r => setTimeout(r, ms)), st = p => p ? 15 : 7, lo = p => p ? 8 : 0;
+  app.innerHTML = `<h1>CONGKLAK</h1>
+  <div class="hud"><span id="h1"></span><span id="h2"></span><span id="h3"></span></div>
+  <div class="msg" id="ms">Pilih lubang di barisan bawah 👇</div>
+  <div class="ck" id="cg"></div>
+  <p class="sub" style="font-size:.85rem">Berakhir di lumbung = giliran lagi. Berakhir di lubang kosongmu = tembak biji lawan di seberang!</p>
+  <button class="btn" onclick="menu()" style="font-size:.85rem;padding:8px 14px">Pulang</button>`;
+  const ms = t => { const e = $("#ms"); if (e) e.textContent = t };
+  function draw() {
+    const g = $("#cg"); if (!g) return;
+    let h = `<div class="store" style="grid-area:1/1/3/2">${b[15]}<small>LAWAN</small></div>`;
+    for (let k = 0; k < 7; k++) h += `<button class="hole" disabled style="grid-area:1/${k + 2}">${b[14 - k]}</button>`;
+    for (let k = 0; k < 7; k++) h += `<button class="hole me" data-i="${k}" ${busy || over || !b[k] ? "disabled" : ""} style="grid-area:2/${k + 2}">${b[k]}</button>`;
+    h += `<div class="store me" style="grid-area:1/9/3/10">${b[7]}<small>KAMU</small></div>`;
+    g.innerHTML = h;
+    $("#h1").textContent = "Kamu " + b[7]; $("#h2").textContent = busy ? "⏳" : "Giliranmu"; $("#h3").textContent = "Lawan " + b[15];
+  }
+  async function play(p, h) {
+    let hand = b[h], i = h, guard = 0; b[h] = 0; draw();
+    while (!over && guard++ < 400) {
+      while (hand > 0) { i = (i + 1) % 16; if (i === st(1 - p)) continue; b[i]++; hand--; sfx.seed(); draw(); await sl(170); if (over) return }
+      if (i === st(p)) { sfx.up(); return "again" }
+      if (b[i] > 1) { hand = b[i]; b[i] = 0; draw(); await sl(220); continue }
+      if (i >= lo(p) && i <= lo(p) + 6) { const o = 14 - i; if (b[o] > 0) { sfx.capture(); b[st(p)] += b[o] + 1; b[o] = 0; b[i] = 0; ms(p ? "Wah, bijimu ditembak! 😈" : "TEMBAK! 🎯 Biji lawan kamu ambil!"); draw() } }
+      return "next";
+    }
+  }
+  const empty = () => b.slice(0, 7).every(x => !x) || b.slice(8, 15).every(x => !x);
+  async function turn(p, h) {
+    busy = true; draw();
+    const r = await play(p, h); if (over) return;
+    if (empty()) return finish();
+    if (r === "again") { ms(p ? "Lawan jalan lagi…" : "Lumbung! Jalan lagi 🔁"); return p ? ai() : (busy = false, draw()) }
+    if (!p) return ai();
+    busy = false; ms("Giliranmu!"); draw();
+  }
+  async function ai() {
+    busy = true; draw(); await sl(600); if (over) return;
+    const o = [8, 9, 10, 11, 12, 13, 14].filter(i => b[i] > 0);
+    const h = o.find(i => (i + b[i]) % 16 === 15) ?? o[Math.floor(Math.random() * o.length)];
+    turn(1, h);
+  }
+  function finish() {
+    for (let i = 0; i < 7; i++) { b[7] += b[i]; b[i] = 0 } for (let i = 8; i < 15; i++) { b[15] += b[i]; b[i] = 0 }
+    const w = b[7] > b[15], sc = b[7] * 10 + (w ? 200 : 0); over = true;
+    end("congklak", sc, w ? "MENANG! MANTAP PISAN! 🎉" : b[7] === b[15] ? "SERI" : "KALAH, ULANG DEUI YUK");
+  }
+  $("#cg").onclick = e => { const x = e.target.closest("[data-i]"); if (x && !busy && !over) turn(0, +x.dataset.i) };
+  stop = () => { over = true }; draw();
+}
+
+/* ---------------- GUNDU ---------------- */
+function gundu() {
+  app.innerHTML = `<h1>GUNDU</h1>
+  <div class="hud"><span id="h1"></span><span id="h2"></span><span id="h3"></span></div>
+  <canvas id="cv" width="360" height="440" style="width:100%;border-radius:20px;background:radial-gradient(circle at 50% 40%,#d9a066,#a8693a);touch-action:none;border:3px solid #6b3a1e"></canvas>
+  <div class="msg" id="ms">Tarik gundu putih, lepas, sentil kelereng keluar lingkaran!</div>
+  <button class="btn" onclick="menu()" style="font-size:.85rem;padding:8px 14px">Pulang</button>`;
+  const cv = $("#cv"), c = cv.getContext("2d"), CX = 180, CY = 175, R = 115, r = 13, cols = ["#ff3cac", "#2de2e6", "#ffe45e", "#7dff6b", "#ff8a3c", "#b38bff", "#5ca8ff"];
+  let round = 1, shots = 6, score = 0, T = [], S, drag = null, moving = false, raf;
+  function setup() {
+    const n = Math.min(3 + round, 8); T = [];
+    for (let i = 0; i < n; i++) { const a = i / n * 6.283; T.push({ x: CX + Math.cos(a) * 55, y: CY + Math.sin(a) * 55, vx: 0, vy: 0, col: cols[i % 7] }) }
+    S = { x: 180, y: 390, vx: 0, vy: 0, col: "#fff" };
+  }
+  const pos = e => { const q = cv.getBoundingClientRect(); return { x: (e.clientX - q.left) * 360 / q.width, y: (e.clientY - q.top) * 440 / q.height } };
+  cv.onpointerdown = e => { const p = pos(e); if (!moving && Math.hypot(p.x - S.x, p.y - S.y) < 55) { drag = p; cv.setPointerCapture(e.pointerId) } };
+  cv.onpointermove = e => { if (drag) drag = pos(e) };
+  cv.onpointerup = () => {
+    if (!drag) return; const dx = S.x - drag.x, dy = S.y - drag.y, l = Math.hypot(dx, dy); drag = null;
+    if (l < 12) return; const sp = Math.min(l, 120) * .24; S.vx = dx / l * sp; S.vy = dy / l * sp; shots--; moving = true; sfx.flick();
+  };
+  function physics() {
+    const all = [S, ...T];
+    for (let s = 0; s < 3; s++) {
+      all.forEach(m => {
+        m.x += m.vx / 3; m.y += m.vy / 3;
+        if (m.x < r) { m.x = r; m.vx = Math.abs(m.vx) * .8 } if (m.x > 360 - r) { m.x = 360 - r; m.vx = -Math.abs(m.vx) * .8 }
+        if (m.y < r) { m.y = r; m.vy = Math.abs(m.vy) * .8 } if (m.y > 440 - r) { m.y = 440 - r; m.vy = -Math.abs(m.vy) * .8 }
+      });
+      for (let i = 0; i < all.length; i++) for (let j = i + 1; j < all.length; j++) {
+        const a = all[i], d = all[j], dx = d.x - a.x, dy = d.y - a.y, q = Math.hypot(dx, dy);
+        if (q < 2 * r && q > 0) {
+          const nx = dx / q, ny = dy / q, o = (2 * r - q) / 2; a.x -= nx * o; a.y -= ny * o; d.x += nx * o; d.y += ny * o;
+          const p = (a.vx - d.vx) * nx + (a.vy - d.vy) * ny; if (p > 0) { sfx.clack(Math.min(1, p / 8)); a.vx -= p * nx; a.vy -= p * ny; d.vx += p * nx; d.vy += p * ny }
+        }
+      }
+    }
+    moving = false;
+    all.forEach(m => { m.vx *= .982; m.vy *= .982; if (Math.hypot(m.vx, m.vy) < .12) m.vx = m.vy = 0; else moving = true });
+  }
+  function settle() {
+    const out = T.filter(m => Math.hypot(m.x - CX, m.y - CY) > R + 4); T = T.filter(m => !out.includes(m));
+    if (out.length) { sfx.capture(); score += out.length * 50 * out.length; $("#ms").textContent = out.length > 1 ? `COMBO ${out.length} gundu! 🔥` : "Kena! Dapet kelereng ✨" }
+    if (!T.length) { sfx.up(); round++; score += 100; shots += 2; $("#ms").textContent = "Ronde baru! +2 sentilan 🎉"; setup() }
+    else if (shots <= 0) end("gundu", score, "KELERENG HABIS!");
+  }
+  function draw() {
+    c.clearRect(0, 0, 360, 440);
+    c.setLineDash([8, 8]); c.lineWidth = 3; c.strokeStyle = "#fff8e1"; c.beginPath(); c.arc(CX, CY, R, 0, 6.283); c.stroke(); c.setLineDash([]);
+    if (drag) {
+      const dx = S.x - drag.x, dy = S.y - drag.y, l = Math.min(Math.hypot(dx, dy), 120) || 1;
+      c.strokeStyle = "#2de2e6"; c.lineWidth = 4; c.beginPath(); c.moveTo(S.x, S.y); c.lineTo(S.x + dx / Math.hypot(dx, dy) * l * 1.6, S.y + dy / Math.hypot(dx, dy) * l * 1.6); c.stroke();
+      c.strokeStyle = "#fff5"; c.beginPath(); c.moveTo(S.x, S.y); c.lineTo(S.x - dx / Math.hypot(dx, dy) * l, S.y - dy / Math.hypot(dx, dy) * l); c.stroke();
+    }
+    [...T, S].forEach(m => {
+      const g = c.createRadialGradient(m.x - 4, m.y - 5, 2, m.x, m.y, r); g.addColorStop(0, "#fff"); g.addColorStop(.35, m.col); g.addColorStop(1, "#0006");
+      c.fillStyle = g; c.shadowColor = m.col; c.shadowBlur = 10; c.beginPath(); c.arc(m.x, m.y, r, 0, 6.283); c.fill(); c.shadowBlur = 0;
+    });
+    $("#h1").textContent = "Ronde " + round; $("#h2").textContent = "🔮 x" + Math.max(shots, 0); $("#h3").textContent = "⭐ " + score;
+  }
+  let was = false;
+  function loop() { raf = requestAnimationFrame(loop); physics(); if (was && !moving) settle(); was = moving; draw() }
+  stop = () => cancelAnimationFrame(raf); setup(); loop();
+}
+
+/* ---------------- LOMPAT TALI ---------------- */
+function tali() {
+  app.innerHTML = `<h1>LOMPAT TALI</h1>
+  <div class="hud"><span id="h1"></span><span id="h2"></span><span id="h3"></span></div>
+  <canvas id="cv" width="360" height="300" style="width:100%;border-radius:20px;background:var(--scene) center bottom/cover;border:3px solid #6b3a1e;touch-action:none"></canvas>
+  <div class="msg" id="ms">Tap pas karet lewat di kakimu!</div>
+  <button class="btn cy big" id="jp">LONCAT! ⬆️</button>
+  <p><button class="btn" onclick="menu()" style="font-size:.85rem;padding:8px 14px">Pulang</button></p>`;
+  const cv = $("#cv"), c = cv.getContext("2d"); let th = 0, jumps = 0, lives = 3, jt = -1, h = 0, hit = false, inW = false, last = 0, raf, bad = 0, per = 1.3;
+  const jump = () => { if (jt < 0) { jt = 0; sfx.jump() } };
+  const key = e => { if (e.code === "Space" || e.code === "ArrowUp") { e.preventDefault(); jump() } };
+  $("#jp").onpointerdown = jump; cv.onpointerdown = jump; addEventListener("keydown", key);
+  function loop(t) {
+    raf = requestAnimationFrame(loop); const dt = Math.min(.05, (t - last) / 1000 || 0); last = t;
+    per = Math.max(.62, 1.3 - Math.floor(jumps / 5) * .07); th = (th + dt / per * 6.283) % 6.283;
+    if (jt >= 0) { jt += dt; h = 72 * Math.sin(Math.PI * jt / .5); if (jt >= .5) { jt = -1; h = 0 } }
+    const cs = Math.cos(th);
+    if (cs > .93) {
+      inW = true;
+      if (!hit && h < 26) { hit = true; lives--; bad = .4; sfx.knock(); $("#ms").textContent = "Kena karet! 😵"; if (lives <= 0) return end("tali", jumps * 10, "YAAH, KENA! 😵") }
+    } else if (inW) { inW = false; if (!hit) { jumps++; jumps % 5 === 0 ? sfx.up() : sfx.hop(jumps); $("#ms").textContent = jumps % 5 === 0 ? "Ngebut! ⚡" : "Mantul! ✨" } hit = false }
+    bad = Math.max(0, bad - dt);
+    c.clearRect(0, 0, 360, 300);
+    c.fillStyle = "#7a4a24"; c.fillRect(0, 252, 360, 48);
+    const ym = 145 + 105 * cs, cy = 2 * ym - 190;
+    c.strokeStyle = "#e63946"; c.lineWidth = 6; c.lineCap = "round"; c.shadowColor = "#e63946"; c.shadowBlur = 14;
+    c.beginPath(); c.moveTo(40, 190); c.quadraticCurveTo(180, cy, 320, 190); c.stroke(); c.shadowBlur = 0;
+    for (const [n, x, k] of [[other(), 30, 1], [other2(), 330, -1]]) { c.save(); c.translate(x, 250); c.rotate(Math.sin(th) * .05 * k + Math.sin(t / 260 + k) * .02); dimg(c, n, -34, -108, 68, 108); c.restore() }
+    const sy = jt >= 0 ? 1 + .14 * Math.sin(Math.PI * jt / .5) : 1 + .025 * Math.sin(t / 110); c.save(); c.translate(180, 250 - h); c.scale(1 / sy, sy); c.globalAlpha = bad > 0 ? .5 : 1; dimg(c, avatar, -30, -96, 60, 96); c.restore();
+    $("#h1").textContent = "Lompatan " + jumps; $("#h2").textContent = "❤️".repeat(lives); $("#h3").textContent = "⚡ " + (1.3 / per).toFixed(1) + "x";
+  }
+  stop = () => { cancelAnimationFrame(raf); removeEventListener("keydown", key) }; raf = requestAnimationFrame(loop);
+}
+/* ---------------- KONTROL GRID (dipakai Ucing Sumput) ---------------- */
+const PAD = `<div class="pad"><span></span><button class="btn cy" data-d="0,-1">⬆️</button><span></span><button class="btn cy" data-d="-1,0">⬅️</button><button class="btn cy" data-d="0,1">⬇️</button><button class="btn cy" data-d="1,0">➡️</button></div>`;
+function ctl(move, sel) {
+  const keys = { ArrowUp: [0, -1], w: [0, -1], ArrowDown: [0, 1], s: [0, 1], ArrowLeft: [-1, 0], a: [-1, 0], ArrowRight: [1, 0], d: [1, 0] };
+  const key = e => { const k = keys[e.key]; if (k) { e.preventDefault(); move(...k) } };
+  addEventListener("keydown", key);
+  document.querySelectorAll(".pad [data-d]").forEach(b => b.onpointerdown = () => move(...b.dataset.d.split(",").map(Number)));
+  let sx, sy; const g = $(sel);
+  g.addEventListener("touchstart", e => { sx = e.touches[0].clientX; sy = e.touches[0].clientY }, { passive: true });
+  g.addEventListener("touchend", e => { const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy; if (Math.max(Math.abs(dx), Math.abs(dy)) < 30) return; Math.abs(dx) > Math.abs(dy) ? move(Math.sign(dx), 0) : move(0, Math.sign(dy)) });
+  return () => removeEventListener("keydown", key);
+}
+
+/* ---------------- UCING SUMPUT ---------------- */
+function sumput() {
+  const N = 8, walls = [[2, 2], [5, 2], [2, 5], [5, 5]], base = { x: 3, y: 3 }, S0 = { x: 0, y: 7 }, U0 = { x: 6, y: 1 };
+  let round = 1, lives = 3, score = 0, P, U, count, bush = [], chase = false, done = false;
+  const rnd = n => Math.floor(Math.random() * n), isW = (x, y) => walls.some(w => w[0] === x && w[1] === y), D = (a, b) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
+  const hid = () => bush.some(b => b.x === P.x && b.y === P.y), sees = () => D(U, P) <= (hid() ? 1 : round >= 3 ? 3 : 2);
+  app.innerHTML = `<h1>UCING SUMPUT</h1>
+  <div class="hud"><span id="h1"></span><span id="h2"></span><span id="h3"></span></div>
+  <div class="msg" id="ms"></div><div class="grid" id="gr" style="grid-template-columns:repeat(8,1fr)"></div>${PAD}
+  <p class="sub" style="font-size:.85rem">Sembunyi di 🌿 biar ga kelihatan, terus lari ke tiang 🏠 (hong!)</p>
+  <button class="btn" onclick="menu()" style="font-size:.85rem;padding:8px 14px">Pulang</button>`;
+  const ms = t => $("#ms").textContent = t;
+  function setup() {
+    P = { ...S0 }; U = { ...U0 }; count = 6; bush = [];
+    while (bush.length < 6) { const x = rnd(N), y = rnd(N); if (!isW(x, y) && !(x === 3 && y === 3) && !(x === 0 && y === 7) && !(x === 6 && y === 1) && !bush.some(b => b.x === x && b.y === y)) bush.push({ x, y }) }
+    ms("Ucing ngitung 🙈 … buruan ngumpet!");
+  }
+  function draw() {
+    let h = "";
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+      let c = isW(x, y) ? "🛖" : bush.some(b => b.x === x && b.y === y) ? "🌿" : x === 3 && y === 3 ? "🏠" : "";
+      if (U.x === x && U.y === y) c = count > 0 ? "🙈" : chase ? "😾" : "🐱";
+      if (P.x === x && P.y === y) c = hid() ? "🫣" : kidTag(avatar);
+      h += `<div class="cell ${x === 3 && y === 3 ? "f" : ""} ${P.x === x && P.y === y ? "p" : ""}" style="font-size:1.2rem">${c}</div>`;
+    }
+    $("#gr").innerHTML = h; $("#h1").textContent = "Ronde " + round; $("#h2").textContent = "❤️".repeat(lives); $("#h3").textContent = count > 0 ? "🙈 " + count : "👀 ⭐" + score;
+  }
+  function step(toP) {
+    const o = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(d => ({ x: U.x + d[0], y: U.y + d[1] })).filter(q => q.x >= 0 && q.y >= 0 && q.x < N && q.y < N && !isW(q.x, q.y));
+    if (!o.length) return;
+    U = toP ? o.sort((a, b) => Math.abs(a.x - P.x) + Math.abs(a.y - P.y) - Math.abs(b.x - P.x) - Math.abs(b.y - P.y))[0] : o[rnd(o.length)];
+  }
+  function move(dx, dy) {
+    if (done) return; const nx = P.x + dx, ny = P.y + dy;
+    if (nx < 0 || ny < 0 || nx >= N || ny >= N || isW(nx, ny)) return;
+    P = { x: nx, y: ny }; sfx.step();
+    if (P.x === base.x && P.y === base.y) { score += 100 + round * 20 + count * 5; round++; sfx.up(); setup(); draw(); ms("HONG! Selamat nyampe tiang! 🎉"); return }
+    if (count > 0) { count--; ms(count ? "Ucing ngitung 🙈 … " + count : "Ucing buka mata! 👀 Awas!"); draw(); return }
+    chase = sees();
+    if (Math.random() < Math.min(.95, .55 + round * .06 + (chase ? .2 : 0))) step(chase);
+    chase = sees(); ms(chase ? "Ucing nyium-nyium kamu! 😾" : hid() ? "Aman, ngumpet bagus 🫣" : "Ucing lagi nyari-nyari…");
+    if (D(U, P) <= 1 && chase) {
+      lives--; sfx.knock(); ms("Ketahuan! Nah, kamu jadi ucing 😹");
+      if (lives <= 0) { done = true; end("sumput", score, "YAAH, KETAHUAN! 😵"); return }
+      P = { ...S0 }; U = { ...U0 }; count = 6;
+    }
+    draw();
+  }
+  const off = ctl(move, "#gr"); stop = () => { done = true; off() }; setup(); draw();
+}
+
+/* ---------------- EGRANG ---------------- */
+function egrang() {
+  app.innerHTML = `<h1>EGRANG</h1>
+  <div class="hud"><span id="h1"></span><span id="h2"></span><span id="h3"></span></div>
+  <canvas id="cv" width="360" height="300" style="width:100%;border-radius:20px;background:var(--scene) center bottom/cover;border:3px solid #6b3a1e"></canvas>
+  <div class="msg" id="ms">Tap KIRI-KANAN gantian buat melangkah, jaga biar ga oleng!</div>
+  <div class="row"><button class="btn pk big" id="bl" style="width:48%">⬅️ KIRI</button><button class="btn cy big" id="br" style="width:48%">KANAN ➡️</button></div>
+  <p><button class="btn" onclick="menu()" style="font-size:.85rem;padding:8px 14px">Pulang</button></p>`;
+  const c = $("#cv").getContext("2d"); let th = 0, w = 0, steps = 0, lives = 3, last = 0, inv = 0, nz = 0, sc = 0, lt = 0, raf, warn = false, lL = 0, lR = 0;
+  const ms = t => $("#ms").textContent = t;
+  function tap(side) {
+    if (inv > 0) return; w += side * .5; side < 0 ? lL = .2 : lR = .2;
+    if (side !== last) { steps++; sfx.step(); if (steps % 10 === 0) { sfx.up(); ms("Mantul! " + (steps * .6).toFixed(1) + " meter 🎋") } }
+    else { w += side * .35; ms("Gantian kakinya dong! 😅") }
+    last = side;
+  }
+  const key = e => { const k = { ArrowLeft: -1, a: -1, ArrowRight: 1, d: 1 }[e.key]; if (k) { e.preventDefault(); tap(k) } };
+  addEventListener("keydown", key); $("#bl").onpointerdown = () => tap(-1); $("#br").onpointerdown = () => tap(1);
+  function loop(t) {
+    raf = requestAnimationFrame(loop); const dt = Math.min(.05, (t - lt) / 1000 || 0); lt = t; lL = Math.max(0, lL - dt); lR = Math.max(0, lR - dt);
+    if (inv > 0) { inv -= dt; th = w = 0 }
+    else {
+      nz -= dt; if (nz <= 0) { nz = .35 + Math.random() * .3; w += (Math.random() - .5) * (.55 + Math.min(steps, 150) * .01) }
+      w += (1.2 * th - 1.2 * w) * dt; th += w * dt;
+      if (Math.abs(th) > .7 && !warn) { warn = true; ms("Awas oleng! ⚠️") } if (Math.abs(th) < .5) warn = false;
+      if (Math.abs(th) >= 1) {
+        lives--; sfx.knock(); inv = .9; th = w = 0; last = 0; ms("Euleuh, jatuh! 😵");
+        if (lives <= 0) return end("egrang", steps * 10, "YAAH, JATUH! 😵");
+      }
+    }
+    sc += (steps * 40 - sc) * Math.min(1, dt * 6);
+    c.clearRect(0, 0, 360, 300);
+    for (let i = 0; i < 5; i++) { const x = ((i * 130 - sc * .6) % 650 + 650) % 650 - 80; c.font = "54px serif"; c.textAlign = "center"; c.fillText(i % 2 ? "🌴" : "🛖", x, 232) }
+    c.fillStyle = "#6b8f3a"; c.fillRect(0, 250, 360, 50); c.fillStyle = "#4f7a2a"; for (let i = 0; i < 9; i++) c.fillRect(((i * 50 - sc) % 400 + 400) % 400 - 20, 262 + (i % 3) * 12, 30, 4);
+    c.save(); c.translate(180, 250); c.rotate(th * .55); c.lineCap = "round"; c.strokeStyle = "#d9a441"; c.lineWidth = 8;
+    const oL = -14 * Math.sin(Math.PI * lL / .2), oR = -14 * Math.sin(Math.PI * lR / .2);
+    c.beginPath(); c.moveTo(-16, oL); c.lineTo(-16, -105 + oL); c.moveTo(16, oR); c.lineTo(16, -105 + oR); c.stroke();
+    c.fillStyle = "#6b3a1e"; c.fillRect(-26, -48 + oL, 20, 6); c.fillRect(6, -48 + oR, 20, 6);
+    c.globalAlpha = inv > 0 ? .5 : 1; dimg(c, avatar, -26, -132 + (oL + oR) / 2, 52, 84); c.restore();
+    const g = c.createLinearGradient(60, 0, 300, 0); g.addColorStop(0, "#e63946"); g.addColorStop(.3, "#ffd23f"); g.addColorStop(.5, "#5fc98a"); g.addColorStop(.7, "#ffd23f"); g.addColorStop(1, "#e63946");
+    c.fillStyle = g; c.fillRect(60, 14, 240, 10); c.fillStyle = "#3b2412"; c.fillRect(180 + th * 120 - 3, 8, 6, 22);
+    $("#h1").textContent = "📏 " + (steps * .6).toFixed(1) + " m"; $("#h2").textContent = "❤️".repeat(lives); $("#h3").textContent = "⭐ " + steps * 10;
+  }
+  stop = () => { cancelAnimationFrame(raf); removeEventListener("keydown", key) }; raf = requestAnimationFrame(loop);
+}
+/* ---------- ILUSTRASI ANAK KAMPUNG + PEMANDANGAN (SVG, bisa diganti foto/aset sendiri di folder assets/) ---------- */
+const kidSVG = o => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 64"><ellipse cx="20" cy="62" rx="13" ry="2.2" fill="#0003"/>
+<rect x="12" y="44" width="6" height="16" rx="3" fill="${o.skin}"/><rect x="22" y="44" width="6" height="16" rx="3" fill="${o.skin}"/>
+<rect x="10" y="58" width="9" height="3.5" rx="1.7" fill="#5a3a1e"/><rect x="21" y="58" width="9" height="3.5" rx="1.7" fill="#5a3a1e"/>
+${o.girl ? `<path d="M9 40H31L35 53H5Z" fill="${o.pants}"/>` : `<rect x="11" y="40" width="18" height="13" rx="3" fill="${o.pants}"/>`}
+<rect x="10" y="24" width="20" height="19" rx="6" fill="${o.shirt}"/>
+<rect x="4" y="25" width="6" height="16" rx="3" fill="${o.skin}"/><rect x="30" y="25" width="6" height="16" rx="3" fill="${o.skin}"/>
+${o.kuncir ? `<circle cx="8" cy="19" r="4.5" fill="#2b1a10"/><circle cx="32" cy="19" r="4.5" fill="#2b1a10"/><circle cx="20" cy="16" r="10" fill="${o.skin}"/><path d="M10 14a10 10 0 0 1 20 0q-10-5-20 0z" fill="#2b1a10"/>` : o.girl ? `<path d="M7 18a13 13 0 0 1 26 0v11q-13 6-26 0z" fill="${o.hair}"/><ellipse cx="20" cy="17" rx="8" ry="9" fill="${o.skin}"/>` : `<circle cx="20" cy="16" r="10" fill="${o.skin}"/><path d="M10 14a10 10 0 0 1 20 0q-10-4-20 0z" fill="#2b1a10"/>${o.peci ? `<rect x="11" y="3" width="18" height="8" rx="2" fill="#1b1b1b"/>` : ""}${o.caping ? `<path d="M3 12L20 1L37 12Z" fill="#d9b25c"/>` : ""}`}
+<circle cx="16.5" cy="17" r="1.4" fill="#2b1a10"/><circle cx="23.5" cy="17" r="1.4" fill="#2b1a10"/><circle cx="14" cy="20" r="1.8" fill="#ff7a7a" opacity=".45"/><circle cx="26" cy="20" r="1.8" fill="#ff7a7a" opacity=".45"/>
+<path d="M16.5 21.5q3.5 3 7 0" stroke="#7a3b2a" fill="none" stroke-width="1.2" stroke-linecap="round"/></svg>`;
+const KS = {
+  boy: { skin: "#c68642", shirt: "#e63946", pants: "#2b4a8c" },
+  boy2: { skin: "#d99a5b", shirt: "#2f7de1", pants: "#e8c15a", peci: 1 },
+  girl: { skin: "#d99a5b", shirt: "#ffd23f", pants: "#2f9e6b", hair: "#ff6fa5", girl: 1 },
+  girl2: { skin: "#c68642", shirt: "#8e44ad", pants: "#f4f4f4", hair: "#fff", girl: 1 },
+  boy3: { skin: "#b5733a", shirt: "#3bb273", pants: "#5a3a1e", caping: 1 },
+  girl3: { skin: "#d99a5b", shirt: "#ff6fa5", pants: "#3a6fd9", girl: 1, kuncir: 1 }
+};
+const kidURI = n => "data:image/svg+xml;utf8," + encodeURIComponent(kidSVG(KS[n]));
+const kidTag = n => `<img class="kid" alt="" src="assets/${n}.png" onerror="this.onerror=null;this.src='${kidURI(n)}'">`;
+const IMG = {}; Object.keys(KS).forEach(n => { const i = new Image(); i.onerror = () => { i.onerror = null; i.src = kidURI(n) }; i.src = "assets/" + n + ".png"; IMG[n] = i });
+const dimg = (c, n, x, y, w, h) => { const i = IMG[n]; if (i && i.complete && i.naturalWidth) c.drawImage(i, x, y, w, h) };
+const SCENE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600"><defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffcf8b"/><stop offset=".55" stop-color="#ff9f6b"/><stop offset="1" stop-color="#ffd9a0"/></linearGradient><radialGradient id="g"><stop offset="0" stop-color="#fff7c2"/><stop offset="1" stop-color="#fff7c2" stop-opacity="0"/></radialGradient></defs>
+<rect width="800" height="600" fill="url(#s)"/><circle cx="620" cy="150" r="110" fill="url(#g)"/><circle cx="620" cy="150" r="42" fill="#fff3b0"/>
+<path d="M0 360L110 250L200 320L330 200L470 330L590 250L700 320L800 270V600H0Z" fill="#8a9fc9" opacity=".75"/><path d="M0 400L90 330L190 390L300 310L420 400L560 320L680 400L800 340V600H0Z" fill="#5f9a74"/>
+<g transform="translate(600 358)"><rect y="30" width="70" height="46" fill="#b57a45"/><path d="M-10 32L35 0L80 32Z" fill="#8a4b1f"/><rect x="28" y="46" width="16" height="30" fill="#5a3418"/></g>
+<path d="M0 430Q200 400 400 430T800 420V600H0Z" fill="#9ad27a"/><path d="M0 480Q200 455 400 480T800 470V600H0Z" fill="#7bc25a"/><path d="M0 530Q200 508 400 530T800 522V600H0Z" fill="#5aa84a"/><path d="M0 575Q200 560 400 575T800 570V600H0Z" fill="#46913f"/>
+<g fill="#fff" opacity=".4"><ellipse cx="200" cy="445" rx="70" ry="5"/><ellipse cx="560" cy="495" rx="90" ry="5"/><ellipse cx="300" cy="545" rx="80" ry="4"/></g>
+<g stroke="#5a3418" stroke-width="7" fill="none"><path d="M90 470Q100 380 85 300"/><path d="M730 480Q715 400 735 320"/></g>
+<g fill="#2f8a3a"><ellipse cx="62" cy="296" rx="38" ry="10" transform="rotate(-25 62 296)"/><ellipse cx="112" cy="294" rx="38" ry="10" transform="rotate(25 112 294)"/><ellipse cx="86" cy="282" rx="34" ry="9"/><ellipse cx="712" cy="316" rx="38" ry="10" transform="rotate(-25 712 316)"/><ellipse cx="760" cy="314" rx="38" ry="10" transform="rotate(25 760 314)"/><ellipse cx="735" cy="302" rx="34" ry="9"/></g>
+<g stroke="#5a3418" fill="none" stroke-width="2"><path d="M300 120q8-10 16 0q8-10 16 0"/><path d="M360 150q6-8 12 0q6-8 12 0"/></g></svg>`;
+document.documentElement.style.setProperty("--scene", `url("data:image/svg+xml;utf8,${encodeURIComponent(SCENE)}")`);
+{ const t = new Image(); t.onload = () => document.documentElement.style.setProperty("--scene", 'url("assets/scene.jpg")'); t.src = "assets/scene.jpg" }
+/* ---------- PILIH KARAKTER, KONFETI, LANGIT HIDUP ---------- */
+const NAMA = { boy: "Dimas", girl: "Sari", boy2: "Asep", girl2: "Ayu", boy3: "Joko", girl3: "Wati" };
+let avatar = ls.get("avatar", "boy"); if (!KS[avatar]) avatar = "boy";
+const other = () => avatar === "boy2" ? "boy3" : "boy2", other2 = () => avatar === "girl2" ? "girl3" : "girl2";
+function pickAv(n) {
+  avatar = n; ls.set("avatar", n); sfx.hop(2); toast("Kamu jadi " + NAMA[n] + " 😎");
+  document.querySelectorAll(".av").forEach(b => b.classList.toggle("on", b.dataset.n === n));
+}
+function confetti(n) {
+  const cols = ["#e63946", "#ffd23f", "#2f9e6b", "#2f7de1", "#ff6fa5", "#fff"];
+  for (let i = 0; i < n; i++) {
+    const d = document.createElement("i"); d.className = "cf";
+    d.style.cssText = `left:${Math.random() * 100}vw;background:${cols[i % 6]};--dx:${(Math.random() - .5) * 160}px;animation-duration:${1.8 + Math.random() * 1.6}s;animation-delay:${Math.random() * .4}s;border-radius:${i % 3 ? "2px" : "50%"}`;
+    document.body.appendChild(d); setTimeout(() => d.remove(), 4400);
+  }
+}
+{ const u = sfx.up, w = sfx.win; sfx.up = () => { u(); confetti(14) }; sfx.win = () => { w(); confetti(70) } }
+const bird = '<svg viewBox="0 0 24 10"><path d="M1 8Q6 0 12 6Q18 0 23 8" stroke="#5a3418" fill="none" stroke-width="2" stroke-linecap="round"/></svg>';
+document.body.insertAdjacentHTML("afterbegin", `<div class="sky">
+<div class="cloud" style="top:7%;animation-duration:80s;animation-delay:-20s">☁️</div><div class="cloud" style="top:17%;font-size:46px;animation-duration:110s;animation-delay:-70s">☁️</div><div class="cloud" style="top:27%;font-size:54px;animation-duration:95s;animation-delay:-45s;opacity:.7">☁️</div>
+<div class="bird" style="top:22%;animation-duration:20s;animation-delay:-5s">${bird}</div><div class="bird" style="top:12%;width:20px;animation-duration:27s;animation-delay:-14s">${bird}</div><div class="bird" style="top:31%;width:16px;animation-duration:23s;animation-delay:-9s">${bird}</div>
+<div class="kite">🪁</div></div>`);
+menu();
+</script>
+</body>
+</html>
